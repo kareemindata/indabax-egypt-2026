@@ -1,3 +1,2 @@
 window.INDABAX_SUPABASE_URL = 'https://omkmkvgvspondsqfjiwc.supabase.co';
-
 window.INDABAX_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ta21rdmd2c3BvbmRzcWZqaXdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTg1MDAsImV4cCI6MjA5NzkzNDUwMH0.wVRcXBVe5kAMqIJU-S8gLQay5qqCcjagCHzgMMU7aSM';

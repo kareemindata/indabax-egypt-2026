@@ -292,9 +292,16 @@ html, body { max-width: 100%; }
   .slot-title { font-size: 1.02rem; }
   .room, .slot-role { text-align: left; font-size: .82rem; }
   .slot-body { padding: 14px 16px 16px; }
-  .candidate-grid { grid-template-columns: 1fr; gap: 10px; }
+  .candidate-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .candidate { padding: 11px; }
+  .candidate strong { font-size: .9rem; }
+  .candidate small { font-size: .76rem; }
+  .candidate .fit { font-size: .78rem; }
+  .candidate .pill { font-size: .63rem; padding: 3px 6px; }
+  .candidate .spk-link { width: 34px; height: 34px; }
+  .candidate .spk-link svg { width: 16px; height: 16px; }
   .vote-row { gap: 8px; }
-  .vote-btn { flex: 1; text-align: center; padding: 13px; min-height: 48px; font-size: .95rem; }
+  .vote-btn { flex: 1; text-align: center; padding: 12px; min-height: 44px; font-size: .9rem; }
 
   .speaker-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .fundraising-grid { grid-template-columns: 1fr; gap: 12px; }
