@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="robots" content="noindex,nofollow" />
   <title>IndabaX Egypt 2026 — Program & Speaker Review</title>
-  <link rel="stylesheet" href="assets/site.css?v=5" />
+  <link rel="stylesheet" href="assets/site.css?v=6" />
   <style>
 :root {
   --bg: #07111f;
@@ -257,7 +257,7 @@ html, body { max-width: 100%; }
   body { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 
   /* Replace the top pill nav with a native-style bottom tab bar */
-  nav { display: none !important; }
+  nav:not(.mobile-tabbar) { display: none !important; }
   .mobile-tabbar {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -350,6 +350,18 @@ html, body { max-width: 100%; }
   .footer { text-align: left; font-size: .85rem; }
 }
 
+/* Phones: single-column cards so names/titles don't wrap one word per line */
+@media (max-width: 560px) {
+  .speaker-grid, .fundraising-grid, .candidate-grid { grid-template-columns: 1fr; gap: 12px; }
+  .speaker-card, .funder-card, .candidate { padding: 16px; gap: 9px; }
+  .speaker-card h3 { font-size: 1.06rem; line-height: 1.28; }
+  .speaker-card .title, .speaker-card .fit, .candidate .fit { font-size: .9rem; }
+  .candidate { border-radius: 16px; }
+  .candidate strong { font-size: 1.01rem; }
+  .candidate small { font-size: .84rem; }
+  .candidate .pill, .speaker-card .pill { font-size: .72rem; padding: 5px 9px; }
+}
+
 @media (max-width: 380px) {
   h1 { font-size: 1.6rem; }
   .mobile-tabbar a { font-size: .6rem; }
@@ -361,8 +373,8 @@ html, body { max-width: 100%; }
 }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="assets/config.js?v=5"></script>
-  <script defer src="assets/app.js?v=5"></script>
+  <script defer src="assets/config.js?v=6"></script>
+  <script defer src="assets/app.js?v=6"></script>
 </head>
 <body>
   <div class="wrap">

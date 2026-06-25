@@ -241,7 +241,7 @@ html, body { max-width: 100%; }
   .wrap { padding: 14px 14px 0; }
   body { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 
-  nav { display: none !important; }
+  nav:not(.mobile-tabbar) { display: none !important; }
   .mobile-tabbar {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -317,6 +317,18 @@ html, body { max-width: 100%; }
   .voting-table table { min-width: 520px; }
 
   .footer { text-align: left; font-size: .85rem; }
+}
+
+/* Phones: single-column cards so names/titles don't wrap one word per line */
+@media (max-width: 560px) {
+  .speaker-grid, .fundraising-grid, .candidate-grid { grid-template-columns: 1fr; gap: 12px; }
+  .speaker-card, .funder-card, .candidate { padding: 16px; gap: 9px; }
+  .speaker-card h3 { font-size: 1.06rem; line-height: 1.28; }
+  .speaker-card .title, .speaker-card .fit, .candidate .fit { font-size: .9rem; }
+  .candidate { border-radius: 16px; }
+  .candidate strong { font-size: 1.01rem; }
+  .candidate small { font-size: .84rem; }
+  .candidate .pill, .speaker-card .pill { font-size: .72rem; padding: 5px 9px; }
 }
 
 @media (max-width: 380px) {
