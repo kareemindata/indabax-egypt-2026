@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="robots" content="noindex,nofollow" />
   <title>IndabaX Egypt 2026 — Program & Speaker Review</title>
-  <link rel="stylesheet" href="assets/site.css" />
+  <link rel="stylesheet" href="assets/site.css?v=3" />
   <style>
 :root {
   --bg: #07111f;
@@ -325,9 +325,16 @@ html, body { max-width: 100%; }
   .vote-row { gap: 8px; }
   .vote-btn { flex: 1; text-align: center; padding: 13px; min-height: 48px; font-size: .95rem; }
 
-  /* Directories — single column cards */
-  .speaker-grid, .fundraising-grid { grid-template-columns: 1fr; gap: 12px; }
-  .speaker-card, .funder-card { min-height: auto; padding: 16px; }
+  /* Directories — two-column app-style cards */
+  .speaker-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .fundraising-grid { grid-template-columns: 1fr; gap: 12px; }
+  .speaker-card, .funder-card { min-height: auto; padding: 13px; gap: 7px; }
+  .speaker-card h3 { font-size: .98rem; line-height: 1.2; }
+  .speaker-card .title { font-size: .8rem; }
+  .speaker-card .fit { font-size: .8rem; }
+  .speaker-card .pill { font-size: .66rem; padding: 4px 7px; }
+  .speaker-card .spk-link { width: 36px; height: 36px; }
+  .speaker-card .spk-link svg { width: 17px; height: 17px; }
 
   /* Tables scroll inside their own container instead of breaking layout */
   .voting-table { -webkit-overflow-scrolling: touch; }
@@ -347,8 +354,8 @@ html, body { max-width: 100%; }
 }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="assets/config.js"></script>
-  <script defer src="assets/app.js"></script>
+  <script defer src="assets/config.js?v=3"></script>
+  <script defer src="assets/app.js?v=3"></script>
 </head>
 <body>
   <div class="wrap">
