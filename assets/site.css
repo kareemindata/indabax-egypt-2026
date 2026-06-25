@@ -246,14 +246,19 @@ html, body { max-width: 100%; }
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     position: fixed;
-    left: 0; right: 0; bottom: 0;
+    /* top:auto / margin:0 / border-radius:0 reset values that leak in from the base `nav` rule */
+    top: auto; left: 0; right: 0; bottom: 0;
+    margin: 0;
+    width: 100%;
     z-index: 200;
     gap: 2px;
     padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
     background: rgba(7, 17, 31, .92);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    border: 0;
     border-top: 1px solid var(--line);
+    border-radius: 0;
     box-shadow: 0 -10px 30px rgba(0, 0, 0, .45);
   }
   .mobile-tabbar a {
