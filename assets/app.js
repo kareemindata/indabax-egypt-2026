@@ -7,6 +7,17 @@ const slotLabel=s=>`${s.scenario} · ${s.time_label} · ${s.title}`;
 function status(t,cls=''){const el=$('connectionStatus'); el.textContent=t; el.className='status-strip '+cls;}
 function msg(id,t,cls='muted'){const el=$(id); el.textContent=t; el.className='message '+cls;}
 function priorityClass(p){p=String(p||'').toLowerCase(); if(p.includes('team'))return'team'; if(p.includes('asp'))return'asp'; if(p.includes('high'))return'high'; return'medium';}
+function classifyLinkType(u){u=String(u||'').toLowerCase(); if(u.includes('linkedin.'))return'linkedin'; if(u.includes('scholar.google')||u.includes('orcid.'))return'scholar'; if(u.includes('github.'))return'github'; return'website';}
+function speakerLinkList(s){const out=[],seen=new Set(); const add=(url,type)=>{if(!url)return; url=String(url).trim(); if(!url||url==='#')return; const k=url.toLowerCase(); if(seen.has(k))return; seen.add(k); out.push({url,type:type||classifyLinkType(url)});}; add(s.linkedin_url,'linkedin'); add(s.website_url,'website'); add(s.portfolio_url,'portfolio'); add(s.scholar_url,'scholar'); add(s.profile_url); return out;}
+function primaryLink(s){const l=speakerLinkList(s); return l.length?l[0].url:'';}
+function linkIcon(t){const I={
+linkedin:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3V9Zm6 0h3.8v1.7h.05c.53-1 1.83-2.05 3.76-2.05 4.02 0 4.76 2.65 4.76 6.1V21h-4v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.07 1.4-2.07 2.85V21H9V9Z"/></svg>',
+website:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></svg>',
+portfolio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></svg>',
+scholar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2 9l10 5 10-5-10-5Z"/><path d="M6 11v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/></svg>',
+github:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.1-1.47-1.1-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>'
+}; return I[t]||I.website;}
+function linksRow(s){const links=speakerLinkList(s); if(!links.length)return''; return `<div class="spk-links">${links.map(l=>`<a class="spk-link spk-${l.type}" href="${esc(l.url)}" target="_blank" rel="noopener" title="${esc(l.type)}" aria-label="${esc(l.type)} link" onclick="event.stopPropagation()">${linkIcon(l.type)}</a>`).join('')}</div>`;}
 function initClient(){
   if(!window.INDABAX_SUPABASE_URL || window.INDABAX_SUPABASE_URL.includes('YOUR_PROJECT')){ status('Supabase config is not set. Add your project URL and anon key in assets/config.js.', 'error'); return null; }
   return window.supabase.createClient(window.INDABAX_SUPABASE_URL, window.INDABAX_SUPABASE_ANON_KEY);
@@ -72,7 +83,7 @@ function candidateCard(c){
   const s=c.speakers; const voted=myVotes.has(c.id); const source=c.source==='team_proposed'?'Team proposed':(c.priority||s.priority||'Medium');
   let voteHtml='';
   if(access.verified&&access.can_vote){ voteHtml=voted?`<div class="vote-row"><button class="vote-btn voted" disabled>Voted</button><button class="vote-btn remove" onclick="removeVote('${c.id}')">Remove my vote</button></div>`:`<div class="vote-row"><button class="vote-btn" onclick="castVote('${c.id}')">Vote</button></div>`; }
-  return `<div class="candidate"><div class="candidate-head"><div><strong>${esc(s.name)}</strong><small>${esc(s.title)}${s.org?', '+esc(s.org):''}</small></div><span class="pill ${priorityClass(source)}">${esc(source)}</span></div><div class="pill-row">${(s.focus||[]).slice(0,4).map(f=>`<span class="pill">${esc(f)}</span>`).join('')}</div>${s.fit?`<div class="fit">${esc(s.fit)}</div>`:''}${voteHtml}</div>`;
+  return `<div class="candidate"><div class="candidate-head"><div><strong>${esc(s.name)}</strong><small>${esc(s.title)}${s.org?', '+esc(s.org):''}</small></div><span class="pill ${priorityClass(source)}">${esc(source)}</span></div><div class="pill-row">${(s.focus||[]).slice(0,4).map(f=>`<span class="pill">${esc(f)}</span>`).join('')}</div>${s.fit?`<div class="fit">${esc(s.fit)}</div>`:''}${linksRow(s)}${voteHtml}</div>`;
 }
 function renderScenario(scenario,containerId){
   const list=slots.filter(s=>s.scenario===scenario).sort((a,b)=>a.sort_order-b.sort_order);
@@ -82,7 +93,7 @@ function renderSpeakers(){
   const q=($('searchSpeakers').value||'').toLowerCase(); const p=$('filterPriority').value; const ids=new Set(candidates.map(c=>c.speaker_id)); let list=speakers.filter(s=>ids.has(s.id));
   if(q)list=list.filter(s=>[s.name,s.title,s.org,(s.focus||[]).join(' '),s.fit].join(' ').toLowerCase().includes(q));
   if(p)list=list.filter(s=>p==='Team proposed'?s.status==='team_proposed':s.priority===p);
-  $('speakerDirectory').innerHTML=list.map(s=>{const pr=s.status==='team_proposed'?'Team proposed':(s.priority||'Medium'); return `<div class="speaker-card"><div class="topline"><h3>${esc(s.name)}</h3><span class="rank">${s.rank||'•'}</span></div><div class="title">${esc(s.title)}${s.org?', '+esc(s.org):''}</div><div class="pill-row"><span class="pill ${priorityClass(pr)}">${esc(pr)}</span>${(s.focus||[]).slice(0,5).map(f=>`<span class="pill">${esc(f)}</span>`).join('')}</div><div class="fit">${esc(s.fit||'')}</div>${s.profile_url?`<a href="${esc(s.profile_url)}" target="_blank" rel="noopener">Public profile</a>`:''}</div>`;}).join('')||'<div class="empty">No speakers match the selected filters.</div>';
+  $('speakerDirectory').innerHTML=list.map(s=>{const pr=s.status==='team_proposed'?'Team proposed':(s.priority||'Medium'); const pl=primaryLink(s); return `<div class="speaker-card${pl?' clickable':''}"${pl?` data-href="${esc(pl)}" role="link" tabindex="0" aria-label="Open profile for ${esc(s.name)}"`:''}><div class="topline"><h3>${esc(s.name)}</h3><span class="rank">${s.rank||'•'}</span></div><div class="title">${esc(s.title)}${s.org?', '+esc(s.org):''}</div><div class="pill-row"><span class="pill ${priorityClass(pr)}">${esc(pr)}</span>${(s.focus||[]).slice(0,5).map(f=>`<span class="pill">${esc(f)}</span>`).join('')}</div><div class="fit">${esc(s.fit||'')}</div>${linksRow(s)}</div>`;}).join('')||'<div class="empty">No speakers match the selected filters.</div>';
 }
 function populateProposalSlots(){ $('proposalSlot').innerHTML='<option value="">Select event / session</option>'+slots.map(s=>`<option value="${esc(s.id)}">${esc(slotLabel(s))}</option>`).join(''); }
 async function loadFundraising(){
@@ -128,6 +139,8 @@ window.addEventListener('DOMContentLoaded',async()=>{
   $('speakerForm').addEventListener('submit',submitProposal);
   $('searchSpeakers').addEventListener('input',renderSpeakers);
   $('filterPriority').addEventListener('change',renderSpeakers);
+  $('speakerDirectory').addEventListener('click',e=>{ if(e.target.closest('a'))return; const card=e.target.closest('.speaker-card.clickable'); if(card&&card.dataset.href) window.open(card.dataset.href,'_blank','noopener'); });
+  $('speakerDirectory').addEventListener('keydown',e=>{ if(e.key!=='Enter')return; const card=e.target.closest&&e.target.closest('.speaker-card.clickable'); if(card&&card.dataset.href) window.open(card.dataset.href,'_blank','noopener'); });
   $('searchFunders').addEventListener('input',renderFundraising);
   $('adminSummaryBtn').addEventListener('click',loadAdminSummary);
   $('exportCsvBtn').addEventListener('click',()=>adminExport('csv'));
