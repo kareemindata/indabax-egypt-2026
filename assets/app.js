@@ -58,6 +58,10 @@ function renderAccessControls(){
   $('fundraising').classList.toggle('hidden',!(access.verified&&access.can_view_fundraising));
   $('fundraisingNav').classList.toggle('hidden',!(access.verified&&access.can_view_fundraising));
   const fTab=$('fundraisingTab'); if(fTab) fTab.classList.toggle('hidden',!(access.verified&&access.can_view_fundraising));
+  const sTab=$('suggestTab'); if(sTab) sTab.classList.toggle('hidden',!(access.verified&&access.can_add));
+  // hide the "Open workspace" access card + its nav link once signed in
+  $('access').classList.toggle('hidden', !!access.verified);
+  const aNav=$('accessNav'); if(aNav) aNav.classList.toggle('hidden', !!access.verified);
 }
 async function loadMyVotes(){
   myVotes=new Set();

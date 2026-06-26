@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="assets/site.css?v=13" />
+  <link rel="stylesheet" href="assets/site.css?v=14" />
   <style>
 :root {
   --bg: #07111f;
@@ -418,12 +418,12 @@ html, body { max-width: 100%; }
 }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="assets/config.js?v=13"></script>
-  <script defer src="assets/app.js?v=13"></script>
+  <script defer src="assets/config.js?v=14"></script>
+  <script defer src="assets/app.js?v=14"></script>
 </head>
 <body>
   <div class="wrap">
-    <header class="hero">
+    <header class="hero" id="home">
       <div class="eyebrow">IndabaX Egypt 2026 · Program Review</div>
       <h1>Program scenarios and speaker review</h1>
       <p class="lead">A professional planning workspace for comparing program scenarios and reviewing proposed speakers across sessions, workshops, tutorials, demos, and panels.</p>
@@ -431,7 +431,7 @@ html, body { max-width: 100%; }
     </header>
 
     <nav>
-      <a href="#access">Open workspace</a>
+      <a href="#access" id="accessNav">Open workspace</a>
       <a href="#scenario-a">Scenario A</a>
       <a href="#scenario-b">Scenario B</a>
       <a href="#speakers">Speakers</a>
@@ -506,7 +506,7 @@ html, body { max-width: 100%; }
   </div>
 
   <nav class="mobile-tabbar" aria-label="Sections">
-    <a href="#access" data-section="access" class="active" aria-label="Open workspace">
+    <a href="#home" data-section="home" class="active" aria-label="Workspace home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
       <span>Workspace</span>
     </a>
@@ -525,6 +525,10 @@ html, body { max-width: 100%; }
     <a href="#fundraising" id="fundraisingTab" data-section="fundraising" class="hidden" aria-label="Fundraising">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
       <span>Funding</span>
+    </a>
+    <a href="#add-speaker-panel" id="suggestTab" data-section="add-speaker-panel" class="hidden" aria-label="Suggest a speaker">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+      <span>Suggest</span>
     </a>
   </nav>
 
