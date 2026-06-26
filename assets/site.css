@@ -265,7 +265,9 @@ html, body { max-width: 100%; }
   nav:not(.mobile-tabbar) { display: none !important; }
   .mobile-tabbar {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    /* auto-distribute however many tabs are visible (4, or 5 with the permissioned Funding tab) */
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
     position: fixed;
     /* top:auto / margin:0 / border-radius:0 reset values that leak in from the base `nav` rule */
     top: auto; left: 0; right: 0; bottom: 0;
@@ -289,7 +291,7 @@ html, body { max-width: 100%; }
     transition: color .15s ease, background .15s ease, transform .1s ease;
   }
   .mobile-tabbar a svg { width: 23px; height: 23px; display: block; }
-  .mobile-tabbar a span { line-height: 1; }
+  .mobile-tabbar a span { line-height: 1; white-space: nowrap; }
   .mobile-tabbar a.active { color: var(--cyan); background: rgba(66, 217, 255, .12); }
   .mobile-tabbar a:active { transform: scale(.92); background: rgba(255, 255, 255, .08); }
 

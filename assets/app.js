@@ -57,6 +57,7 @@ function renderAccessControls(){
   $('adminNav').classList.toggle('hidden',!(access.verified&&access.can_export));
   $('fundraising').classList.toggle('hidden',!(access.verified&&access.can_view_fundraising));
   $('fundraisingNav').classList.toggle('hidden',!(access.verified&&access.can_view_fundraising));
+  const fTab=$('fundraisingTab'); if(fTab) fTab.classList.toggle('hidden',!(access.verified&&access.can_view_fundraising));
 }
 async function loadMyVotes(){
   myVotes=new Set();

@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="assets/site.css?v=12" />
+  <link rel="stylesheet" href="assets/site.css?v=13" />
   <style>
 :root {
   --bg: #07111f;
@@ -284,7 +284,9 @@ html, body { max-width: 100%; }
   nav:not(.mobile-tabbar) { display: none !important; }
   .mobile-tabbar {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    /* auto-distribute however many tabs are visible (4, or 5 with the permissioned Funding tab) */
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
     position: fixed;
     /* top:auto / margin:0 / border-radius:0 reset values that leak in from the base `nav` rule */
     top: auto; left: 0; right: 0; bottom: 0;
@@ -317,7 +319,7 @@ html, body { max-width: 100%; }
     transition: color .15s ease, background .15s ease, transform .1s ease;
   }
   .mobile-tabbar a svg { width: 23px; height: 23px; display: block; }
-  .mobile-tabbar a span { line-height: 1; }
+  .mobile-tabbar a span { line-height: 1; white-space: nowrap; }
   .mobile-tabbar a.active { color: var(--cyan); background: rgba(66, 217, 255, .12); }
   .mobile-tabbar a:active { transform: scale(.92); background: rgba(255, 255, 255, .08); }
 
@@ -416,8 +418,8 @@ html, body { max-width: 100%; }
 }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="assets/config.js?v=12"></script>
-  <script defer src="assets/app.js?v=12"></script>
+  <script defer src="assets/config.js?v=13"></script>
+  <script defer src="assets/app.js?v=13"></script>
 </head>
 <body>
   <div class="wrap">
@@ -519,6 +521,10 @@ html, body { max-width: 100%; }
     <a href="#speakers" data-section="speakers" aria-label="Speakers">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11"/></svg>
       <span>Speakers</span>
+    </a>
+    <a href="#fundraising" id="fundraisingTab" data-section="fundraising" class="hidden" aria-label="Fundraising">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+      <span>Funding</span>
     </a>
   </nav>
 
