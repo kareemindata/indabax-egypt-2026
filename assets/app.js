@@ -99,13 +99,13 @@ function candidateCard(c){
 }
 function renderScenario(scenario,containerId){
   const list=slots.filter(s=>s.scenario===scenario).sort((a,b)=>a.sort_order-b.sort_order);
-  $(containerId).innerHTML=list.map(slot=>{const cs=candidates.filter(c=>c.slot_id===slot.id); const body=cs.length?`<div class="candidate-grid">${cs.map(candidateCard).join('')}</div>`:'<div class="empty">No speaker candidates assigned to this slot.</div>'; return `<article class="schedule-card"><div class="slot-head"><div class="time">${esc(slot.time_label)}</div><div class="slot-title">${esc(slot.title)}</div><div class="room">${esc(slot.room)}</div><div class="slot-role">${esc(slot.role_type)}</div></div><div class="slot-body">${body}</div></article>`;}).join('');
+  $(containerId).innerHTML=list.map(slot=>{const cs=candidates.filter(c=>c.slot_id===slot.id); const body=cs.length?`<div class="candidate-grid">${cs.map(candidateCard).join('')}</div>`:'<div class="empty">No speaker candidates assigned to this slot.</div>'; return `<article class="schedule-card"><div class="slot-head"><div class="time">${esc(slot.time_label)}</div><div class="slot-title">${esc(slot.title)}</div><div class="room">${esc(slot.room)}</div><div class="slot-role">${esc(slot.role_type)}</div></div><div class="slot-body">${body}${isAdmin()?`<div class="slot-admin"><button class="btn mini" onclick="openSlotEdit('${esc(slot.id)}')">✎ Edit time / title / room</button></div>`:''}</div></article>`;}).join('');
 }
 function renderSpeakers(){
   const q=($('searchSpeakers').value||'').toLowerCase(); const p=$('filterPriority').value; const ids=new Set(candidates.map(c=>c.speaker_id)); let list=speakers.filter(s=>ids.has(s.id));
   if(q)list=list.filter(s=>[s.name,s.title,s.org,(s.focus||[]).join(' '),s.fit].join(' ').toLowerCase().includes(q));
   if(p)list=list.filter(s=>p==='Team proposed'?s.status==='team_proposed':s.priority===p);
-  $('speakerDirectory').innerHTML=list.map((s,i)=>{const pr=s.status==='team_proposed'?'Team proposed':(s.priority||'Medium'); const pl=primaryLink(s); return `<div class="speaker-card${pl?' clickable':''}"${pl?` data-href="${esc(pl)}" role="link" tabindex="0" aria-label="Open profile for ${esc(s.name)}"`:''}><div class="spk-head">${speakerAvatar(s)}<div class="spk-id"><h3>${esc(s.name)}</h3><div class="title">${esc(s.title)}${s.org?', '+esc(s.org):''}</div></div><span class="rank">${i+1}</span></div><div class="pill-row"><span class="pill ${priorityClass(pr)}">${esc(pr)}</span>${(s.focus||[]).slice(0,5).map(f=>`<span class="pill">${esc(f)}</span>`).join('')}</div><div class="fit">${esc(s.fit||'')}</div>${linksRow(s)}</div>`;}).join('')||'<div class="empty">No speakers match the selected filters.</div>';
+  $('speakerDirectory').innerHTML=list.map((s,i)=>{const pr=s.status==='team_proposed'?'Team proposed':(s.priority||'Medium'); const pl=primaryLink(s); return `<div class="speaker-card${pl?' clickable':''}"${pl?` data-href="${esc(pl)}" role="link" tabindex="0" aria-label="Open profile for ${esc(s.name)}"`:''}><div class="spk-head">${speakerAvatar(s)}<div class="spk-id"><h3>${esc(s.name)}</h3><div class="title">${esc(s.title)}${s.org?', '+esc(s.org):''}</div></div><span class="rank">${i+1}</span></div><div class="pill-row"><span class="pill ${priorityClass(pr)}">${esc(pr)}</span>${(s.focus||[]).slice(0,5).map(f=>`<span class="pill">${esc(f)}</span>`).join('')}</div><div class="fit">${esc(s.fit||'')}</div>${linksRow(s)}${isAdmin()?`<div class="card-admin"><button class="btn mini" onclick="event.stopPropagation();openSpeakerEdit('${esc(s.id)}')">✎ Edit speaker</button></div>`:''}</div>`;}).join('')||'<div class="empty">No speakers match the selected filters.</div>';
 }
 function populateProposalSlots(){ $('proposalSlot').innerHTML='<option value="">Select event / session</option>'+slots.map(s=>`<option value="${esc(s.id)}">${esc(slotLabel(s))}</option>`).join(''); }
 async function loadFundraising(){
@@ -117,7 +117,7 @@ async function loadFundraising(){
 function renderFundraising(){
   const q=($('searchFunders').value||'').toLowerCase(); let list=fundraisingTargets;
   if(q) list=list.filter(f=>Object.values(f).join(' ').toLowerCase().includes(q));
-  $('fundraisingList').innerHTML=list.map(f=>`<div class="funder-card"><div class="topline"><h3>${esc(f.name)}</h3><span class="rank">${esc(f.rank)}</span></div><div class="pill-row"><span class="pill high">${esc(f.priority)}</span><span class="pill medium">${esc(f.likelihood)}</span><span class="pill">${esc(f.category)}</span></div><div class="funder-meta"><div><b>Suggested ask:</b> ${esc(f.ask)}</div><div><b>Contact path:</b> ${esc(f.contact_path)}</div><div><b>Why likely:</b> ${esc(f.rationale)}</div><div><b>Status:</b> ${esc(f.status)}</div></div></div>`).join('')||'<div class="empty">No funders match the filter.</div>';
+  $('fundraisingList').innerHTML=list.map(f=>`<div class="funder-card"><div class="topline"><h3>${esc(f.name)}</h3><span class="rank">${esc(f.rank)}</span></div><div class="pill-row"><span class="pill high">${esc(f.priority)}</span><span class="pill medium">${esc(f.likelihood)}</span><span class="pill">${esc(f.category)}</span></div><div class="funder-meta"><div><b>Suggested ask:</b> ${esc(f.ask)}</div><div><b>Contact path:</b> ${esc(f.contact_path)}</div><div><b>Why likely:</b> ${esc(f.rationale)}</div><div><b>Status:</b> ${esc(f.status)}</div></div><div class="fund-admin"><select aria-label="Change status" onchange="setFundStatus('${esc(f.id)}',this.value)">${FUND_STATUS.map(o=>`<option${o===f.status?' selected':''}>${esc(o)}</option>`).join('')}</select><button class="btn mini" onclick="editFunder('${esc(f.id)}')">✎ Edit</button></div></div>`).join('')||'<div class="empty">No funders match the filter.</div>';
 }
 async function loadAdminSummary(){
   if(!access.verified||!access.can_export){msg('adminMessage','Admin dashboard is not available for this access.','error');return;}
@@ -138,6 +138,69 @@ async function adminExport(format){
 function toCsv(rows){if(!rows.length)return''; const headers=Object.keys(rows[0]); const cell=v=>'"'+String(v??'').replaceAll('"','""')+'"'; return [headers.map(cell).join(','),...rows.map(r=>headers.map(h=>cell(r[h])).join(','))].join('\n');}
 function download(filename,content,type){const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);}
 function renderAll(){renderAccessControls(); renderScenario('A','scenarioAContainer'); renderScenario('B','scenarioBContainer'); renderSpeakers(); if(access.can_view_fundraising) renderFundraising();}
+/* ===================== ADMIN EDITING ===================== */
+const FUND_STATUS=['Not contacted','Contacted','In discussion','Awaiting reply','Verbal yes','Committed','Sponsoring','On hold','Declined'];
+const SPK_STATUS=[['proposed','Proposed'],['team_proposed','Team proposed'],['archived','Archived (hidden)']];
+const SPK_PRIORITY=['High','Medium','Aspirational','Team proposed'];
+function isAdmin(){ return !!(access.verified && access.can_export); }
+function canFund(){ return !!(access.verified && access.can_view_fundraising); }
+function fld(label,id,val,ph){ return `<label class="fld"><span>${esc(label)}</span><input id="${id}" value="${esc(val||'')}" placeholder="${esc(ph||'')}" autocomplete="off"></label>`; }
+function fldArea(label,id,val){ return `<label class="fld"><span>${esc(label)}</span><textarea id="${id}" rows="2">${esc(val||'')}</textarea></label>`; }
+function fldSelect(label,id,opts,val){ return `<label class="fld"><span>${esc(label)}</span><select id="${id}">${opts.map(o=>{const v=Array.isArray(o)?o[0]:o,t=Array.isArray(o)?o[1]:o;return `<option value="${esc(v)}"${String(v)===String(val||'')?' selected':''}>${esc(t)}</option>`;}).join('')}</select></label>`; }
+function openModal(title,bodyHtml,onSave){
+  const m=$('editModal'); m.querySelector('.modal-title').textContent=title; m.querySelector('.modal-body').innerHTML=bodyHtml; m.classList.remove('hidden'); document.body.style.overflow='hidden';
+  const save=m.querySelector('.modal-save'); save.textContent='Save';
+  save.onclick=async()=>{ save.disabled=true; save.textContent='Saving…'; try{ await onSave(); }catch(err){ alert((err&&err.message)||'Could not save'); } save.disabled=false; save.textContent='Save'; };
+}
+function closeModal(){ const m=$('editModal'); m.classList.add('hidden'); m.querySelector('.modal-body').innerHTML=''; document.body.style.overflow=''; }
+function resizeImage(file,max,q){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onerror=()=>rej(new Error('read failed')); fr.onload=()=>{ const im=new Image(); im.onerror=()=>rej(new Error('image failed')); im.onload=()=>{ const sc=Math.min(max/im.width,max/im.height,1); const w=Math.max(1,Math.round(im.width*sc)),h=Math.max(1,Math.round(im.height*sc)); const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(im,0,0,w,h); res(c.toDataURL('image/jpeg',q||0.8)); }; im.src=fr.result; }; fr.readAsDataURL(file); }); }
+async function rpcSave(name,params,after){ const {data,error}=await db.rpc(name,params); if(error||!data||!data.ok){ alert((data&&data.message)||(error&&error.message)||'Save failed'); return false; } closeModal(); if(after) await after(); return true; }
+
+function openSpeakerEdit(id){
+  const s=(speakers||[]).find(x=>x.id===id); if(!s||!isAdmin())return;
+  let newPhoto; // undefined=unchanged, ''=clear, dataURI=set
+  const curImg = s.photo_url || (SPEAKER_PHOTOS[spkSlug(s.name)]?('assets/speakers/'+SPEAKER_PHOTOS[spkSlug(s.name)]):'') || spkMonogram(s.name);
+  const body =
+    `<div class="edit-photo"><img id="edPrev" class="spk-avatar" src="${esc(curImg)}" alt="">`+
+    `<div><input type="file" id="edFile" accept="image/*" hidden>`+
+    `<div class="row-btns"><button type="button" class="btn mini" id="edPick">Upload photo</button>`+
+    `<button type="button" class="btn mini" id="edClear">Use initials</button></div>`+
+    `<p class="tiny">Pick an image from your device — it replaces the avatar.</p></div></div>`+
+    fld('Name','edName',s.name)+fld('Title','edTitle',s.title)+fld('Organization','edOrg',s.org)+
+    fld('Focus areas (comma-separated)','edFocus',(s.focus||[]).join(', '))+
+    fldArea('Why they fit','edFit',s.fit)+
+    fldSelect('Priority','edPriority',SPK_PRIORITY,s.priority||'Medium')+
+    fldSelect('Status','edStatus',SPK_STATUS,s.status||'proposed')+
+    fld('LinkedIn URL','edLinkedin',s.linkedin_url)+fld('Website URL','edWebsite',s.website_url)+
+    fld('Google Scholar URL','edScholar',s.scholar_url)+fld('Portfolio URL','edPortfolio',s.portfolio_url)+
+    fld('Other profile URL','edProfile',s.profile_url);
+  openModal('Edit speaker',body,async()=>{
+    if($('edName').value.trim().length<2){ alert('Speaker name is required'); return; }
+    const p={p_invite_code:access.code,p_speaker_id:id,p_name:$('edName').value.trim(),p_title:$('edTitle').value.trim(),p_org:$('edOrg').value.trim(),p_focus:$('edFocus').value.trim(),p_fit:$('edFit').value.trim(),p_priority:$('edPriority').value,p_status:$('edStatus').value,p_linkedin_url:$('edLinkedin').value.trim(),p_website_url:$('edWebsite').value.trim(),p_scholar_url:$('edScholar').value.trim(),p_portfolio_url:$('edPortfolio').value.trim(),p_profile_url:$('edProfile').value.trim()};
+    if(newPhoto!==undefined) p.p_photo_url=newPhoto;
+    await rpcSave('update_speaker',p,loadData);
+  });
+  $('edPick').onclick=()=>$('edFile').click();
+  $('edFile').onchange=async e=>{ const f=e.target.files[0]; if(!f)return; try{ newPhoto=await resizeImage(f,256,0.8); $('edPrev').src=newPhoto; }catch(_){ alert('Could not read that image'); } };
+  $('edClear').onclick=()=>{ newPhoto=''; $('edPrev').src=spkMonogram(s.name); };
+}
+function openSlotEdit(id){
+  const sl=(slots||[]).find(x=>x.id===id); if(!sl||!isAdmin())return;
+  const body=fld('Time','edTime',sl.time_label)+fld('Title','edTitle',sl.title)+fld('Room','edRoom',sl.room)+fld('Role type','edRole',sl.role_type);
+  openModal('Edit agenda item',body,async()=>{ await rpcSave('update_program_slot',{p_invite_code:access.code,p_slot_id:id,p_time_label:$('edTime').value.trim(),p_title:$('edTitle').value.trim(),p_room:$('edRoom').value.trim(),p_role_type:$('edRole').value.trim()},loadData); });
+}
+function openFundraiserEdit(f){
+  if(!canFund())return;
+  const body=fld('Name','fdName',f&&f.name)+fld('Category','fdCat',f&&f.category)+fld('Contact path','fdContact',f&&f.contact_path)+fld('Priority','fdPriority',f&&f.priority)+fld('Likelihood','fdLike',f&&f.likelihood)+fldArea('Suggested ask','fdAsk',f&&f.ask)+fldArea('Why likely (rationale)','fdRat',f&&f.rationale)+fldSelect('Status','fdStatus',FUND_STATUS,(f&&f.status)||'Not contacted');
+  openModal(f?'Edit fundraising target':'Add fundraising target',body,async()=>{
+    if($('fdName').value.trim().length<2){ alert('Name is required'); return; }
+    const p={p_invite_code:access.code,p_name:$('fdName').value.trim(),p_category:$('fdCat').value.trim(),p_contact_path:$('fdContact').value.trim(),p_priority:$('fdPriority').value.trim(),p_likelihood:$('fdLike').value.trim(),p_ask:$('fdAsk').value.trim(),p_rationale:$('fdRat').value.trim(),p_status:$('fdStatus').value};
+    if(f){ p.p_id=f.id; await rpcSave('update_fundraising_target',p,loadFundraising); } else { await rpcSave('add_fundraising_target',p,loadFundraising); }
+  });
+}
+function editFunder(id){ const f=(fundraisingTargets||[]).find(x=>String(x.id)===String(id)); if(f) openFundraiserEdit(f); }
+async function setFundStatus(id,status){ const {data,error}=await db.rpc('set_fundraising_status',{p_invite_code:access.code,p_id:id,p_status:status}); if(error||!data||!data.ok){ alert((data&&data.message)||'Status update failed'); } await loadFundraising(); }
+
 window.addEventListener('DOMContentLoaded',async()=>{
   const params=new URLSearchParams(location.search);
   const paramName=params.get('name');
@@ -154,6 +217,8 @@ window.addEventListener('DOMContentLoaded',async()=>{
   $('speakerDirectory').addEventListener('click',e=>{ if(e.target.closest('a'))return; const card=e.target.closest('.speaker-card.clickable'); if(card&&card.dataset.href) window.open(card.dataset.href,'_blank','noopener'); });
   $('speakerDirectory').addEventListener('keydown',e=>{ if(e.key!=='Enter')return; const card=e.target.closest&&e.target.closest('.speaker-card.clickable'); if(card&&card.dataset.href) window.open(card.dataset.href,'_blank','noopener'); });
   $('searchFunders').addEventListener('input',renderFundraising);
+  const _m=$('editModal'); if(_m){ _m.querySelector('.modal-close').onclick=closeModal; _m.querySelector('.modal-cancel').onclick=closeModal; _m.addEventListener('click',e=>{ if(e.target===_m) closeModal(); }); document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!_m.classList.contains('hidden')) closeModal(); }); }
+  const _af=$('addFunderBtn'); if(_af) _af.addEventListener('click',()=>openFundraiserEdit(null));
   $('adminSummaryBtn').addEventListener('click',loadAdminSummary);
   $('exportCsvBtn').addEventListener('click',()=>adminExport('csv'));
   $('exportJsonBtn').addEventListener('click',()=>adminExport('json'));

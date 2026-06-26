@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="assets/site.css?v=14" />
+  <link rel="stylesheet" href="assets/site.css?v=15" />
   <style>
 :root {
   --bg: #07111f;
@@ -209,6 +209,28 @@ input:focus, select:focus, textarea:focus { border-color: rgba(66,217,255,.55); 
 .footer { border-top: 1px solid var(--line); margin-top: 40px; padding-top: 24px; color: var(--muted); font-size: .9rem; text-align: left; }
 .hidden { display: none !important; }
 .permissioned.disabled { display: none !important; }
+
+/* ===================== ADMIN EDIT MODAL + CONTROLS ===================== */
+.modal-overlay { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(2,6,14,.66); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.modal { width: 100%; max-width: 560px; max-height: 92vh; overflow: auto; background: var(--bg2); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); }
+.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg2); z-index: 1; }
+.modal-head h3 { margin: 0; font-size: 1.2rem; }
+.modal-close { background: none; border: 0; color: var(--muted); font-size: 1.05rem; cursor: pointer; padding: 4px 9px; border-radius: 8px; }
+.modal-close:hover { background: rgba(255,255,255,.08); color: var(--text); }
+.modal-body { padding: 18px 20px; display: grid; gap: 12px; }
+.modal-foot { display: flex; gap: 10px; justify-content: flex-end; padding: 14px 20px; border-top: 1px solid var(--line); position: sticky; bottom: 0; background: var(--bg2); }
+.modal .modal-foot .btn { width: auto; }
+.fld { display: grid; gap: 6px; }
+.fld > span { font-size: .8rem; font-weight: 800; color: var(--muted); }
+.fld textarea { min-height: 60px; resize: vertical; }
+.edit-photo { display: flex; gap: 14px; align-items: center; }
+.edit-photo .spk-avatar { width: 76px; height: 76px; }
+.row-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.btn.mini { padding: 8px 12px; font-size: .82rem; border-radius: 10px; font-weight: 800; width: auto; }
+.card-admin { margin-top: 4px; display: flex; gap: 8px; justify-content: center; }
+.slot-admin { margin-top: 12px; }
+.fund-admin { display: flex; gap: 8px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+.fund-admin select { width: auto; min-width: 150px; padding: 9px 12px; }
 @media (max-width: 1100px) {
   .login-grid, .speaker-form, .controls { grid-template-columns: 1fr; }
   .speaker-form textarea { grid-column: span 1; }
@@ -418,8 +440,8 @@ html, body { max-width: 100%; }
 }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="assets/config.js?v=14"></script>
-  <script defer src="assets/app.js?v=14"></script>
+  <script defer src="assets/config.js?v=15"></script>
+  <script defer src="assets/app.js?v=15"></script>
 </head>
 <body>
   <div class="wrap">
@@ -491,7 +513,7 @@ html, body { max-width: 100%; }
 
     <section id="fundraising" class="card hidden">
       <div class="section-title compact"><div><h2>Fundraising</h2><p class="subtitle">Potential sponsors and partners for conference support.</p></div></div>
-      <div class="controls"><input id="searchFunders" placeholder="Search funder, category, rationale…" /></div>
+      <div class="controls"><input id="searchFunders" placeholder="Search funder, category, rationale…" /><button class="btn primary" id="addFunderBtn" type="button">+ Add target</button></div>
       <div id="fundraisingList" class="fundraising-grid"></div>
     </section>
 
@@ -503,6 +525,14 @@ html, body { max-width: 100%; }
     </section>
 
     <footer class="footer"><p>Program planning draft. Proposed candidates only. Formal invitations and confirmations should follow the official organizing process.</p></footer>
+  </div>
+
+  <div id="editModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Edit">
+    <div class="modal">
+      <div class="modal-head"><h3 class="modal-title">Edit</h3><button type="button" class="modal-close" aria-label="Close">✕</button></div>
+      <div class="modal-body"></div>
+      <div class="modal-foot"><button type="button" class="btn modal-cancel">Cancel</button><button type="button" class="btn primary modal-save">Save</button></div>
+    </div>
   </div>
 
   <nav class="mobile-tabbar" aria-label="Sections">
