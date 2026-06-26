@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="assets/site.css?v=15" />
+  <link rel="stylesheet" href="assets/site.css?v=16" />
   <style>
 :root {
   --bg: #07111f;
@@ -231,6 +231,10 @@ input:focus, select:focus, textarea:focus { border-color: rgba(66,217,255,.55); 
 .slot-admin { margin-top: 12px; }
 .fund-admin { display: flex; gap: 8px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
 .fund-admin select { width: auto; min-width: 150px; padding: 9px 12px; }
+.btn.danger { border-color: rgba(255,123,123,.34); background: rgba(255,123,123,.10); color: var(--red); }
+.btn.danger:hover { background: rgba(255,123,123,.18); }
+.add-slot-btn { width: 100%; margin-top: 4px; border-style: dashed; color: var(--cyan); }
+.mobile-tabbar::-webkit-scrollbar { display: none; }
 @media (max-width: 1100px) {
   .login-grid, .speaker-form, .controls { grid-template-columns: 1fr; }
   .speaker-form textarea { grid-column: span 1; }
@@ -308,7 +312,10 @@ html, body { max-width: 100%; }
     display: grid;
     /* auto-distribute however many tabs are visible (4, or 5 with the permissioned Funding tab) */
     grid-auto-flow: column;
-    grid-auto-columns: 1fr;
+    grid-auto-columns: minmax(66px, 1fr);
+    overflow-x: auto;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
     position: fixed;
     /* top:auto / margin:0 / border-radius:0 reset values that leak in from the base `nav` rule */
     top: auto; left: 0; right: 0; bottom: 0;
@@ -440,8 +447,8 @@ html, body { max-width: 100%; }
 }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="assets/config.js?v=15"></script>
-  <script defer src="assets/app.js?v=15"></script>
+  <script defer src="assets/config.js?v=16"></script>
+  <script defer src="assets/app.js?v=16"></script>
 </head>
 <body>
   <div class="wrap">
@@ -475,26 +482,6 @@ html, body { max-width: 100%; }
       <div id="accessMessage" class="message muted"></div>
     </section>
 
-    <section class="card add-card permissioned" id="add-speaker-panel">
-      <div class="section-title compact">
-        <div>
-          <h2>Suggest a speaker</h2>
-          <p class="subtitle">Add a proposed speaker to any existing session, workshop, tutorial, demo, or panel.</p>
-        </div>
-      </div>
-      <form id="speakerForm" class="speaker-form">
-        <select id="proposalSlot" required></select>
-        <input id="proposalName" placeholder="Speaker name" required />
-        <input id="proposalTitle" placeholder="Position / title" />
-        <input id="proposalOrg" placeholder="Company / university" />
-        <input id="proposalFocus" placeholder="Focus areas, e.g. GenAI, Health AI, MLOps" />
-        <input id="proposalLink" placeholder="Public profile URL" />
-        <textarea id="proposalFit" placeholder="Why this person fits this event"></textarea>
-        <button class="btn primary" type="submit">Add proposed speaker</button>
-      </form>
-      <div id="proposalMessage" class="message muted"></div>
-    </section>
-
     <section id="scenario-a">
       <div class="section-title"><div><h2>Scenario A — 4 rooms including one workshop-ready room</h2><p class="subtitle">Parallel program with one hands-on workshop room and three session rooms.</p></div></div>
       <div id="scenarioAContainer" class="schedule-grid"></div>
@@ -522,6 +509,26 @@ html, body { max-width: 100%; }
       <div class="login-grid admin-actions"><button class="btn" id="adminSummaryBtn">Load vote summary</button><button class="btn primary" id="exportCsvBtn">Export detailed CSV</button><button class="btn" id="exportJsonBtn">Export JSON</button></div>
       <div id="adminMessage" class="message muted"></div>
       <div id="adminSummary" class="voting-table"></div>
+    </section>
+
+    <section class="card add-card permissioned" id="add-speaker-panel">
+      <div class="section-title compact">
+        <div>
+          <h2>Suggest a speaker</h2>
+          <p class="subtitle">Add a proposed speaker to any existing session, workshop, tutorial, demo, or panel.</p>
+        </div>
+      </div>
+      <form id="speakerForm" class="speaker-form">
+        <select id="proposalSlot" required></select>
+        <input id="proposalName" placeholder="Speaker name" required />
+        <input id="proposalTitle" placeholder="Position / title" />
+        <input id="proposalOrg" placeholder="Company / university" />
+        <input id="proposalFocus" placeholder="Focus areas, e.g. GenAI, Health AI, MLOps" />
+        <input id="proposalLink" placeholder="Public profile URL" />
+        <textarea id="proposalFit" placeholder="Why this person fits this event"></textarea>
+        <button class="btn primary" type="submit">Add proposed speaker</button>
+      </form>
+      <div id="proposalMessage" class="message muted"></div>
     </section>
 
     <footer class="footer"><p>Program planning draft. Proposed candidates only. Formal invitations and confirmations should follow the official organizing process.</p></footer>
@@ -555,6 +562,10 @@ html, body { max-width: 100%; }
     <a href="#fundraising" id="fundraisingTab" data-section="fundraising" class="hidden" aria-label="Fundraising">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
       <span>Funding</span>
+    </a>
+    <a href="#admin" id="adminTab" data-section="admin" class="hidden" aria-label="Admin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v5c0 5 3.4 7.7 8 9 4.6-1.3 8-4 8-9V6l-8-3Z"/><path d="m9.5 12 1.8 1.8 3.2-3.6"/></svg>
+      <span>Admin</span>
     </a>
     <a href="#add-speaker-panel" id="suggestTab" data-section="add-speaker-panel" class="hidden" aria-label="Suggest a speaker">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
