@@ -20,8 +20,10 @@ html { scroll-behavior: smooth; }
 body {
   margin: 0;
   color: var(--text);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Plus Jakarta Sans", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background:
     radial-gradient(circle at top left, rgba(66,217,255,.24), transparent 34rem),
     radial-gradient(circle at top right, rgba(255,209,102,.18), transparent 34rem),
@@ -227,6 +229,25 @@ input:focus, select:focus, textarea:focus { border-color: rgba(66,217,255,.55); 
 .speaker-card.clickable { cursor: pointer; transition: transform .12s ease, border-color .15s ease; }
 .speaker-card.clickable:hover { transform: translateY(-2px); border-color: rgba(66, 217, 255, .4); }
 .speaker-card.clickable:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* Speaker / candidate avatars (real photo committed under assets/speakers/ or a generated monogram) */
+.spk-avatar { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; display: block; border: 1px solid var(--line); background: var(--panel2); }
+.spk-head { display: flex; align-items: center; gap: 12px; }
+.spk-id { flex: 1 1 auto; min-width: 0; }
+.spk-id h3 { margin: 0; }
+.spk-head .rank { flex: 0 0 auto; }
+.candidate-head { align-items: center; }
+.candidate-head .spk-avatar { width: 44px; height: 44px; }
+.cand-id { flex: 1 1 auto; min-width: 0; }
+.speaker-card h3, .speaker-card .title, .speaker-card .fit,
+.candidate .cand-id strong, .candidate .cand-id small {
+  display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere;
+}
+.speaker-card h3 { -webkit-line-clamp: 2; }
+.speaker-card .title { -webkit-line-clamp: 2; }
+.speaker-card .fit { -webkit-line-clamp: 3; }
+.candidate .cand-id strong { -webkit-line-clamp: 2; }
+.candidate .cand-id small { -webkit-line-clamp: 2; }
 @media (max-width: 768px) { .spk-link { width: 44px; height: 44px; } .spk-link svg { width: 20px; height: 20px; } }
 
 /* ===================== MOBILE APP EXPERIENCE ===================== */
@@ -253,9 +274,8 @@ html, body { max-width: 100%; }
     z-index: 200;
     gap: 2px;
     padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
-    background: rgba(7, 17, 31, .92);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    /* solid (not blurred) bg — backdrop-filter repaints every scroll frame and was the main mobile scroll jank */
+    background: rgba(9, 18, 33, .97);
     border: 0;
     border-top: 1px solid var(--line);
     border-radius: 0;
@@ -324,16 +344,31 @@ html, body { max-width: 100%; }
   .footer { text-align: left; font-size: .85rem; }
 }
 
-/* Phones: single-column cards so names/titles don't wrap one word per line */
+/* Phones: candidate & fundraising single-column; speaker directory stays 2-col (compact) per request */
 @media (max-width: 560px) {
-  .speaker-grid, .fundraising-grid, .candidate-grid { grid-template-columns: 1fr; gap: 12px; }
-  .speaker-card, .funder-card, .candidate { padding: 16px; gap: 9px; }
-  .speaker-card h3 { font-size: 1.06rem; line-height: 1.28; }
-  .speaker-card .title, .speaker-card .fit, .candidate .fit { font-size: .9rem; }
+  .fundraising-grid, .candidate-grid { grid-template-columns: 1fr; gap: 12px; }
+  .funder-card, .candidate { padding: 16px; gap: 9px; }
   .candidate { border-radius: 16px; }
-  .candidate strong { font-size: 1.01rem; }
-  .candidate small { font-size: .84rem; }
-  .candidate .pill, .speaker-card .pill { font-size: .72rem; padding: 5px 9px; }
+  .candidate .cand-id strong { font-size: 1rem; }
+  .candidate .cand-id small { font-size: .84rem; }
+  .candidate .fit { font-size: .9rem; }
+  .candidate .pill { font-size: .72rem; padding: 5px 9px; }
+
+  /* compact 2-column speaker cards: avatar stacked on top so the name gets the full card width */
+  .speaker-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .speaker-card { padding: 13px 11px; gap: 8px; }
+  .spk-head { flex-direction: column; align-items: center; text-align: center; gap: 8px; position: relative; }
+  .spk-id { width: 100%; }
+  .speaker-card .spk-avatar { width: 58px; height: 58px; }
+  .speaker-card h3 { font-size: .92rem; line-height: 1.25; }
+  .speaker-card .title { font-size: .76rem; -webkit-line-clamp: 2; }
+  .speaker-card .fit { font-size: .77rem; -webkit-line-clamp: 2; text-align: center; }
+  .speaker-card .pill-row { justify-content: center; }
+  .speaker-card .spk-links { justify-content: center; }
+  .speaker-card .pill { font-size: .64rem; padding: 3px 7px; }
+  .spk-head .rank { position: absolute; top: 0; right: 0; width: 24px; height: 24px; font-size: .76rem; }
+  .speaker-card .spk-link { width: 34px; height: 34px; }
+  .speaker-card .spk-link svg { width: 16px; height: 16px; }
 }
 
 @media (max-width: 380px) {
