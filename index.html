@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="assets/site.css?v=16" />
+  <link rel="stylesheet" href="assets/site.css?v=17" />
   <style>
 :root {
   --bg: #07111f;
@@ -32,7 +32,7 @@
   --radius: 22px;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; color-scheme: dark; }
 body {
   margin: 0;
   color: var(--text);
@@ -137,6 +137,8 @@ input, select, textarea {
   font: inherit;
 }
 input::placeholder, textarea::placeholder { color: #8da1b8; }
+/* native dropdown list — dark, readable (was rendering white/light) */
+select option, select optgroup { background-color: #0e1730; color: #eef5ff; }
 input:focus, select:focus, textarea:focus { border-color: rgba(66,217,255,.55); box-shadow: 0 0 0 3px rgba(66,217,255,.12); }
 .btn {
   border: 1px solid rgba(255,255,255,.18);
@@ -447,8 +449,8 @@ html, body { max-width: 100%; }
 }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="assets/config.js?v=16"></script>
-  <script defer src="assets/app.js?v=16"></script>
+  <script defer src="assets/config.js?v=17"></script>
+  <script defer src="assets/app.js?v=17"></script>
 </head>
 <body>
   <div class="wrap">
