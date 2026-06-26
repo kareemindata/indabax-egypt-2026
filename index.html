@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="assets/site.css?v=18" />
+  <link rel="stylesheet" href="assets/site.css?v=19" />
   <style>
 :root {
   --bg: #07111f;
@@ -93,6 +93,10 @@ h1 { margin: 0 0 16px; font-size: clamp(2rem, 4vw, 4.65rem); line-height: .95; m
 }
 .status-strip.ok { border-color: rgba(103,232,165,.35); color: var(--green); }
 .status-strip.error { border-color: rgba(255,123,123,.38); color: var(--red); }
+/* Hero — centered content (badge + heading + subtitle + status box) */
+header.hero { text-align: center; }
+header.hero h1 { margin-left: auto; margin-right: auto; }
+header.hero .lead { max-width: 980px; margin-left: auto; margin-right: auto; }
 nav {
   position: sticky;
   top: 0;
@@ -473,15 +477,15 @@ html, body { max-width: 100%; }
 }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="assets/config.js?v=18"></script>
-  <script defer src="assets/app.js?v=18"></script>
+  <script defer src="assets/config.js?v=19"></script>
+  <script defer src="assets/app.js?v=19"></script>
 </head>
 <body>
   <div class="wrap">
     <header class="hero" id="home">
       <div class="eyebrow">IndabaX Egypt 2026 · Program Review</div>
       <h1>Program scenarios and speaker review</h1>
-      <p class="lead">A professional planning workspace for comparing program scenarios and reviewing proposed speakers across sessions, workshops, tutorials, demos, and panels.</p>
+      <p class="lead">This workspace supports internal program planning for IndabaX Egypt 2026. All speakers listed are proposed candidates pending formal invitation and confirmation.</p>
       <div class="status-strip" id="connectionStatus">Opening program workspace…</div>
     </header>
 

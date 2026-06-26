@@ -77,6 +77,10 @@ h1 { margin: 0 0 16px; font-size: clamp(2rem, 4vw, 4.65rem); line-height: .95; m
 }
 .status-strip.ok { border-color: rgba(103,232,165,.35); color: var(--green); }
 .status-strip.error { border-color: rgba(255,123,123,.38); color: var(--red); }
+/* Hero — centered content (badge + heading + subtitle + status box) */
+header.hero { text-align: center; }
+header.hero h1 { margin-left: auto; margin-right: auto; }
+header.hero .lead { max-width: 980px; margin-left: auto; margin-right: auto; }
 nav {
   position: sticky;
   top: 0;

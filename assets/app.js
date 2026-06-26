@@ -36,7 +36,7 @@ async function loadData(){
   const {data,error}=await db.rpc('get_program_data',{p_invite_code:access.code});
   if(error||!data){console.error(error); status('Could not load the program workspace. Check the access code or setup.', 'error'); return;}
   slots=data.slots||[]; speakers=data.speakers||[]; candidates=data.candidates||[];
-  status('Program workspace loaded.', 'ok');
+  status('Workspace ready.', 'ok');
   populateProposalSlots(); await loadMyVotes(); renderAccessControls(); renderAll();
 }
 async function verifyAccess(){
