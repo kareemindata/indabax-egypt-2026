@@ -45,7 +45,7 @@ async function loadData(){
   populateProposalSlots(); populateTagFilter(); await loadMyVotes();
   voteTotal=null; votesBySpeaker={};
   if(access.can_export){ try{ const r=await db.rpc('admin_vote_summary',{p_admin_code:access.code}); if(!r.error&&Array.isArray(r.data)){ voteTotal=0; r.data.forEach(x=>{ const v=Number(x.votes||0); voteTotal+=v; votesBySpeaker[x.speaker_name]=(votesBySpeaker[x.speaker_name]||0)+v; }); } }catch(_){} }
-  renderAccessControls(); renderAll();
+  renderAccessControls(); renderAll(); renderRegistration();
 }
 async function verifyAccess(){
   const name=$('reviewerName').value.trim(); const code=$('inviteCode').value.trim();
@@ -240,24 +240,44 @@ function deleteSlot(id){ rpcDelete('delete_program_slot',{p_invite_code:access.c
 function deleteSpeaker(id){ const s=(speakers||[]).find(x=>x.id===id); rpcDelete('delete_speaker',{p_invite_code:access.code,p_speaker_id:id},'Permanently delete '+((s&&s.name)||'this speaker')+'? This also removes their votes.\n\nTip: Edit → Status → Archived just hides them and keeps votes.',loadData); }
 function deleteFunder(id){ const f=(fundraisingTargets||[]).find(x=>String(x.id)===String(id)); rpcDelete('delete_fundraising_target',{p_invite_code:access.code,p_id:id},'Delete '+((f&&f.name)||'this fundraising target')+'?',loadFundraising); }
 
+let REG_URL_DB='';  // registration link saved in Supabase (app_settings); overrides the code constant
+function regUrl(){ const u=(REG_URL_DB||REGISTRATION_FORM_URL||'').trim(); return (u && u!=='TODO_PASTE_GOOGLE_FORM_URL' && /^https?:\/\//i.test(u)) ? u : ''; }
 function renderRegistration(){
   const el=$('registrationBody'); if(!el)return;
-  const url=REGISTRATION_FORM_URL;
-  const ready=url && url!=='TODO_PASTE_GOOGLE_FORM_URL' && /^https?:\/\//i.test(url);
-  if(ready){
-    el.innerHTML='<a class="btn primary reg-cta" href="'+esc(url)+'" target="_blank" rel="noopener">Open registration form ↗</a>';
-  } else {
-    el.innerHTML='<button class="btn primary reg-cta" type="button" disabled aria-disabled="true">Open registration form ↗</button><p class="reg-soon">Registration form link coming soon.</p>';
+  const url=regUrl();
+  let html = url
+    ? '<a class="btn primary reg-cta" href="'+esc(url)+'" target="_blank" rel="noopener">Open registration form ↗</a>'
+    : '<button class="btn primary reg-cta" type="button" disabled aria-disabled="true">Open registration form ↗</button><p class="reg-soon">Registration form link coming soon.</p>';
+  if(access.verified && access.can_add){
+    html+='<div class="reg-setlink"><label class="fld"><span>Registration form link (saved for everyone)</span><input id="regUrlInput" type="url" inputmode="url" placeholder="https://forms.gle/…" value="'+esc(REG_URL_DB||'')+'"></label><div class="reg-actions"><button class="btn" type="button" onclick="saveRegUrl()">Save link</button></div></div>';
   }
+  el.innerHTML=html;
+}
+async function saveRegUrl(){
+  if(!db||!access.code) return;
+  const inp=$('regUrlInput'); const v=(inp&&inp.value||'').trim();
+  if(v && !/^https?:\/\//i.test(v)){ alert('Please enter a full URL starting with http:// or https://'); return; }
+  const {data,error}=await db.rpc('set_app_setting',{p_invite_code:access.code,p_key:'registration_url',p_value:v});
+  if(error||!data||!data.ok){ alert((data&&data.message)||(error&&error.message)||'Could not save the link'); return; }
+  REG_URL_DB=v; renderRegistration();
+}
+async function loadRegistrationUrl(){
+  if(!db) return;
+  try{ const {data,error}=await db.rpc('get_app_setting',{p_key:'registration_url'}); if(!error && typeof data==='string') REG_URL_DB=data||''; }catch(_){}
+  renderRegistration();
 }
 function statChip(n,label,cls){ return '<div class="stat'+(cls?' '+cls:'')+'"><b>'+n+'</b><span>'+esc(label)+'</span></div>'; }
 function renderStats(){
   const el=$('statsStrip'); if(!el)return;
-  if(!access.verified || !(speakers&&speakers.length)){ el.classList.add('hidden'); el.innerHTML=''; return; }
-  const byP=p=>speakers.filter(s=>(s.priority||'')===p).length;
-  let html=statChip(speakers.length,'Proposed speakers');
+  const ids=new Set((candidates||[]).map(c=>c.speaker_id));
+  const shown=(speakers||[]).filter(s=>ids.has(s.id)); // same set the Speaker directory shows
+  if(!access.verified || !shown.length){ el.classList.add('hidden'); el.innerHTML=''; return; }
+  const byP=p=>shown.filter(s=>(s.priority||'')===p).length;
+  const byInv=v=>shown.filter(s=>String(s.invite_status||'').toLowerCase()===v).length;
+  let html=statChip(shown.length,'Proposed speakers');
   html+=statChip(byP('High'),'High','st-high')+statChip(byP('Medium'),'Medium','st-med')+statChip(byP('Aspirational'),'Aspirational','st-asp');
   const low=byP('Low'); if(low) html+=statChip(low,'Low');
+  if(shown.some(s=>s.invite_status)){ html+=statChip(byInv('confirmed'),'Confirmed','st-conf')+statChip(byInv('declined'),'Declined','st-decl'); }
   html+=statChip(voteTotal!=null?voteTotal:myVotes.size, voteTotal!=null?'Votes cast':'My votes');
   if(access.can_view_fundraising && Array.isArray(fundraisingTargets)){
     const notC=fundraisingTargets.filter(f=>{const s=String(f.status||'').toLowerCase(); return !s || s==='not contacted';}).length;
@@ -303,6 +323,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
   $('exportJsonBtn').addEventListener('click',()=>adminExport('json'));
   renderRegistration();
   db=initClient();
+  if(db) loadRegistrationUrl();
   if(db){
     status('Ready. Enter the access code shared with you to open the workspace.', 'ok');
     if(access.code){ await verifyAccess(); } else { renderAccessControls(); }
