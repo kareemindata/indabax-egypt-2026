@@ -276,6 +276,7 @@ input:focus, select:focus, textarea:focus { border-color: rgba(66,217,255,.55); 
 @media (max-width: 640px) { .reg-form { grid-template-columns: 1fr; } }
 
 /* ===================== NAV ACTIVE · STATS · BACK-TO-TOP · A11Y ===================== */
+nav:not(.mobile-tabbar) { justify-content: center; }
 nav:not(.mobile-tabbar) a.active { background: rgba(66,217,255,.14); color: var(--cyan); }
 a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 .stats-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 16px 0 4px; }
