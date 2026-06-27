@@ -1,9 +1,8 @@
-// ===== Registration (Google Form) — paste your form links here =====
-// GOOGLE_FORM_EMBED_URL: the form's EMBED link (…/viewform?embedded=true) → shows inline in an iframe.
-// GOOGLE_FORM_URL:       the public form link (…/viewform)               → "Open registration form" button.
-// Leave both '' to keep the preview scaffold. NOTHING is submitted/collected until these are set.
-const GOOGLE_FORM_EMBED_URL = ''; // TODO: paste Google Form EMBED url here
-const GOOGLE_FORM_URL = '';       // TODO: paste Google Form public url here
+// ===== Registration — external Google Form (link-out only; NO data collected on this site) =====
+// TODO: paste the public Google Form URL (e.g. https://forms.gle/XXXX or https://docs.google.com/forms/d/e/…/viewform)
+const REGISTRATION_FORM_URL = "TODO_PASTE_GOOGLE_FORM_URL";
+let voteTotal = null;     // total votes across all reviewers (admins only, from admin_vote_summary)
+let votesBySpeaker = {};  // { speaker_name: vote count } (admins only)
 let db=null;
 let slots=[]; let speakers=[]; let candidates=[]; let myVotes=new Set(); let fundraisingTargets=[];
 let access={name:localStorage.getItem('reviewerName')||'', code:localStorage.getItem('inviteCode')||'', verified:false, can_vote:false, can_add:false, can_export:false, can_view_fundraising:false, role:null, is_public:false};
@@ -43,7 +42,10 @@ async function loadData(){
   if(error||!data){console.error(error); status('Could not load the program workspace. Check the access code or setup.', 'error'); return;}
   slots=data.slots||[]; speakers=data.speakers||[]; candidates=data.candidates||[];
   status('Workspace ready.', 'ok');
-  populateProposalSlots(); await loadMyVotes(); renderAccessControls(); renderAll();
+  populateProposalSlots(); populateTagFilter(); await loadMyVotes();
+  voteTotal=null; votesBySpeaker={};
+  if(access.can_export){ try{ const r=await db.rpc('admin_vote_summary',{p_admin_code:access.code}); if(!r.error&&Array.isArray(r.data)){ voteTotal=0; r.data.forEach(x=>{ const v=Number(x.votes||0); voteTotal+=v; votesBySpeaker[x.speaker_name]=(votesBySpeaker[x.speaker_name]||0)+v; }); } }catch(_){} }
+  renderAccessControls(); renderAll();
 }
 async function verifyAccess(){
   const name=$('reviewerName').value.trim(); const code=$('inviteCode').value.trim();
@@ -109,17 +111,18 @@ function renderScenario(scenario,containerId){
   $(containerId).innerHTML=list.map(slot=>{const cs=candidates.filter(c=>c.slot_id===slot.id); const body=cs.length?`<div class="candidate-grid">${cs.map(candidateCard).join('')}</div>`:'<div class="empty">No speaker candidates assigned to this slot.</div>'; return `<article class="schedule-card"><div class="slot-head"><div class="time">${esc(slot.time_label)}</div><div class="slot-title">${esc(slot.title)}</div><div class="room">${esc(slot.room)}</div><div class="slot-role">${esc(slot.role_type)}</div></div><div class="slot-body">${slot.owner?`<div class="slot-owner">👤 Owner: ${esc(slot.owner)}</div>`:''}${body}${isAdmin()?`<div class="slot-admin"><button class="btn mini" onclick="openSlotEdit('${esc(slot.id)}')">✎ Edit</button><button class="btn mini danger" onclick="deleteSlot('${esc(slot.id)}')">🗑 Delete</button></div>`:''}</div></article>`;}).join('') + (isAdmin()?`<button class="btn add-slot-btn" onclick="openSlotAdd('${scenario}')">+ Add agenda item</button>`:'');
 }
 function renderSpeakers(){
-  const q=($('searchSpeakers').value||'').toLowerCase(); const p=$('filterPriority').value; const ids=new Set(candidates.map(c=>c.speaker_id)); let list=speakers.filter(s=>ids.has(s.id));
+  const q=($('searchSpeakers').value||'').toLowerCase(); const p=$('filterPriority').value; const t=$('filterTag')?$('filterTag').value:''; const ids=new Set(candidates.map(c=>c.speaker_id)); let list=speakers.filter(s=>ids.has(s.id));
   if(q)list=list.filter(s=>[s.name,s.title,s.org,(s.focus||[]).join(' '),s.fit].join(' ').toLowerCase().includes(q));
   if(p)list=list.filter(s=>p==='Team proposed'?s.status==='team_proposed':s.priority===p);
-  $('speakerDirectory').innerHTML=list.map((s,i)=>{const pr=s.status==='team_proposed'?'Team proposed':(s.priority||'Medium'); return `<div class="speaker-card clickable" data-id="${esc(s.id)}" role="button" tabindex="0" aria-label="Open profile for ${esc(s.name)}"><div class="spk-head">${speakerAvatar(s)}<div class="spk-id"><h3>${esc(s.name)}</h3><div class="title">${esc(s.title)}${s.org?', '+esc(s.org):''}</div></div><span class="rank">${i+1}</span></div><div class="pill-row"><span class="pill ${priorityClass(pr)}">${esc(pr)}</span>${(s.focus||[]).slice(0,5).map(f=>`<span class="pill">${esc(f)}</span>`).join('')}</div>${s.invite_status?`<div class="ip-row">${invitePill(s.invite_status)}</div>`:''}<div class="fit">${esc(s.fit||'')}</div>${linksRow(s)}${isAdmin()?`<div class="card-admin"><select class="ip-select" onclick="event.stopPropagation()" onchange="setInviteStatus('${esc(s.id)}',this.value)">${INVITE_PIPELINE.map(o=>`<option${o===(s.invite_status||'Proposed')?' selected':''}>${esc(o)}</option>`).join('')}</select><button class="btn mini" onclick="event.stopPropagation();openSpeakerEdit('${esc(s.id)}')">✎ Edit</button><button class="btn mini danger" onclick="event.stopPropagation();deleteSpeaker('${esc(s.id)}')">🗑</button></div>`:''}</div>`;}).join('')||'<div class="empty">No speakers match the selected filters.</div>';
+  if(t)list=list.filter(s=>(s.focus||[]).includes(t));
+  $('speakerDirectory').innerHTML=list.map((s,i)=>{const pr=s.status==='team_proposed'?'Team proposed':(s.priority||'Medium'); const vc=votesBySpeaker[s.name]; return `<div class="speaker-card clickable" data-id="${esc(s.id)}" role="button" tabindex="0" aria-label="Open profile for ${esc(s.name)}"><div class="spk-head">${speakerAvatar(s)}<div class="spk-id"><h3>${esc(s.name)}</h3><div class="title">${esc(s.title)}${s.org?', '+esc(s.org):''}</div></div><span class="rank">${i+1}</span></div><div class="pill-row"><span class="pill ${priorityClass(pr)}">${esc(pr)}</span>${(s.focus||[]).slice(0,5).map(f=>`<span class="pill">${esc(f)}</span>`).join('')}</div>${(s.invite_status||voteTotal!=null)?`<div class="ip-row">${invitePill(s.invite_status)}${voteTotal!=null?`<span class="votes-pill" title="Votes cast">🗳 ${vc||0} vote${(vc||0)===1?'':'s'}</span>`:''}</div>`:''}<div class="fit">${esc(s.fit||'')}</div>${linksRow(s)}${isAdmin()?`<div class="card-admin"><select class="ip-select" aria-label="Outreach status for ${esc(s.name)}" onclick="event.stopPropagation()" onchange="setInviteStatus('${esc(s.id)}',this.value)">${INVITE_PIPELINE.map(o=>`<option${o===(s.invite_status||'Proposed')?' selected':''}>${esc(o)}</option>`).join('')}</select><button class="btn mini" onclick="event.stopPropagation();openSpeakerEdit('${esc(s.id)}')">✎ Edit</button><button class="btn mini danger" onclick="event.stopPropagation();deleteSpeaker('${esc(s.id)}')">🗑</button></div>`:''}</div>`;}).join('')||'<div class="empty">No speakers match your filters.</div>';
 }
 function populateProposalSlots(){ $('proposalSlot').innerHTML='<option value="">Select event / session</option>'+slots.map(s=>`<option value="${esc(s.id)}">${esc(slotLabel(s))}</option>`).join(''); }
 async function loadFundraising(){
   if(!access.can_view_fundraising)return;
   const {data,error}=await db.rpc('get_fundraising_targets',{p_invite_code:access.code});
   if(error){$('fundraisingList').innerHTML='<div class="empty">Fundraising access denied.</div>';return;}
-  fundraisingTargets=data||[]; renderFundraising();
+  fundraisingTargets=data||[]; renderFundraising(); renderStats();
 }
 function renderFundraising(){
   const q=($('searchFunders').value||'').toLowerCase(); let list=fundraisingTargets;
@@ -144,7 +147,7 @@ async function adminExport(format){
 }
 function toCsv(rows){if(!rows.length)return''; const headers=Object.keys(rows[0]); const cell=v=>'"'+String(v??'').replaceAll('"','""')+'"'; return [headers.map(cell).join(','),...rows.map(r=>headers.map(h=>cell(r[h])).join(','))].join('\n');}
 function download(filename,content,type){const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);}
-function renderAll(){renderAccessControls(); renderScenario('A','scenarioAContainer'); renderScenario('B','scenarioBContainer'); renderSpeakers(); if(access.can_view_fundraising) renderFundraising();}
+function renderAll(){renderAccessControls(); renderScenario('A','scenarioAContainer'); renderScenario('B','scenarioBContainer'); renderSpeakers(); if(access.can_view_fundraising) renderFundraising(); renderStats();}
 /* ===================== ADMIN EDITING ===================== */
 const FUND_STATUS=['Not contacted','Contacted','In discussion','Awaiting reply','Verbal yes','Committed','Sponsoring','On hold','Declined'];
 const SPK_STATUS=[['proposed','Proposed'],['team_proposed','Team proposed'],['archived','Archived (hidden)']];
@@ -239,13 +242,34 @@ function deleteFunder(id){ const f=(fundraisingTargets||[]).find(x=>String(x.id)
 
 function renderRegistration(){
   const el=$('registrationBody'); if(!el)return;
-  if(GOOGLE_FORM_EMBED_URL){
-    el.innerHTML='<div class="reg-actions"><a class="btn primary" href="'+esc(GOOGLE_FORM_URL||GOOGLE_FORM_EMBED_URL)+'" target="_blank" rel="noopener">Open registration form ↗</a></div><div class="reg-embed"><iframe title="IndabaX Egypt 2026 registration form" src="'+esc(GOOGLE_FORM_EMBED_URL)+'" loading="lazy">Loading…</iframe></div>';
-  } else if(GOOGLE_FORM_URL){
-    const note=$('regNote'); if(note) note.innerHTML='Registration is open — use the button below to open the official form.';
-    el.insertAdjacentHTML('afterbegin','<div class="reg-actions" style="margin-bottom:14px"><a class="btn primary" href="'+esc(GOOGLE_FORM_URL)+'" target="_blank" rel="noopener">Open registration form ↗</a></div>');
+  const url=REGISTRATION_FORM_URL;
+  const ready=url && url!=='TODO_PASTE_GOOGLE_FORM_URL' && /^https?:\/\//i.test(url);
+  if(ready){
+    el.innerHTML='<a class="btn primary reg-cta" href="'+esc(url)+'" target="_blank" rel="noopener">Open registration form ↗</a>';
+  } else {
+    el.innerHTML='<button class="btn primary reg-cta" type="button" disabled aria-disabled="true">Open registration form ↗</button><p class="reg-soon">Registration form link coming soon.</p>';
   }
-  /* else: leave the preview scaffold (TODO: set GOOGLE_FORM_EMBED_URL / GOOGLE_FORM_URL above) */
+}
+function statChip(n,label,cls){ return '<div class="stat'+(cls?' '+cls:'')+'"><b>'+n+'</b><span>'+esc(label)+'</span></div>'; }
+function renderStats(){
+  const el=$('statsStrip'); if(!el)return;
+  if(!access.verified || !(speakers&&speakers.length)){ el.classList.add('hidden'); el.innerHTML=''; return; }
+  const byP=p=>speakers.filter(s=>(s.priority||'')===p).length;
+  let html=statChip(speakers.length,'Proposed speakers');
+  html+=statChip(byP('High'),'High','st-high')+statChip(byP('Medium'),'Medium','st-med')+statChip(byP('Aspirational'),'Aspirational','st-asp');
+  const low=byP('Low'); if(low) html+=statChip(low,'Low');
+  html+=statChip(voteTotal!=null?voteTotal:myVotes.size, voteTotal!=null?'Votes cast':'My votes');
+  if(access.can_view_fundraising && Array.isArray(fundraisingTargets)){
+    const notC=fundraisingTargets.filter(f=>{const s=String(f.status||'').toLowerCase(); return !s || s==='not contacted';}).length;
+    html+=statChip(notC,'Sponsors to contact','st-warn');
+  }
+  el.innerHTML=html; el.classList.remove('hidden');
+}
+function populateTagFilter(){
+  const sel=$('filterTag'); if(!sel)return; const cur=sel.value;
+  const tags=new Set(); (speakers||[]).forEach(s=>(s.focus||[]).forEach(t=>{ if(t) tags.add(t); }));
+  const sorted=[...tags].sort((a,b)=>a.localeCompare(b));
+  sel.innerHTML='<option value="">All topics</option>'+sorted.map(t=>'<option'+(t===cur?' selected':'')+'>'+esc(t)+'</option>').join('');
 }
 window.addEventListener('DOMContentLoaded',async()=>{
   const params=new URLSearchParams(location.search);
@@ -260,6 +284,14 @@ window.addEventListener('DOMContentLoaded',async()=>{
   $('speakerForm').addEventListener('submit',submitProposal);
   $('searchSpeakers').addEventListener('input',renderSpeakers);
   $('filterPriority').addEventListener('change',renderSpeakers);
+  if($('filterTag')) $('filterTag').addEventListener('change',renderSpeakers);
+  // sticky top-nav: offset anchor scrolling so headings land below the nav (fixes "Speakers" landing inside a schedule)
+  const syncNavOffset=()=>{ const nv=document.querySelector('nav:not(.mobile-tabbar)'); if(nv && getComputedStyle(nv).display!=='none'){ document.documentElement.style.scrollPaddingTop=(nv.offsetHeight+16)+'px'; } else { document.documentElement.style.scrollPaddingTop=''; } };
+  window.addEventListener('resize',syncNavOffset); setTimeout(syncNavOffset,0);
+  // scrollspy: highlight the active section in the top nav
+  (function(){ const links=Array.prototype.slice.call(document.querySelectorAll('nav:not(.mobile-tabbar) a[href^="#"]')); if(!links.length||!('IntersectionObserver' in window))return; const map={}; links.forEach(a=>{ const id=a.getAttribute('href').slice(1); if(id) map[id]=a; }); const secs=Object.keys(map).map(id=>document.getElementById(id)).filter(Boolean); const io=new IntersectionObserver(es=>{ es.forEach(e=>{ if(e.isIntersecting&&map[e.target.id]){ links.forEach(a=>a.classList.remove('active')); map[e.target.id].classList.add('active'); } }); },{rootMargin:'-45% 0px -50% 0px',threshold:0}); secs.forEach(s=>io.observe(s)); })();
+  // back-to-top button
+  const _btt=$('backToTop'); if(_btt){ _btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'})); const onSc=()=>{ if(window.scrollY>500) _btt.classList.add('show'); else _btt.classList.remove('show'); }; window.addEventListener('scroll',onSc,{passive:true}); onSc(); }
   $('speakerDirectory').addEventListener('click',e=>{ if(e.target.closest('a,button,select,input,textarea,label'))return; const card=e.target.closest('.speaker-card'); if(card&&card.dataset.id) openProfile(card.dataset.id); });
   $('speakerDirectory').addEventListener('keydown',e=>{ if(e.key!=='Enter')return; const card=e.target.closest&&e.target.closest('.speaker-card'); if(card&&card.dataset.id) openProfile(card.dataset.id); });
   ['scenarioAContainer','scenarioBContainer'].forEach(cid=>{ const c=$(cid); if(c) c.addEventListener('click',e=>{ if(e.target.closest('a,button,select,input,textarea,label'))return; const card=e.target.closest('.candidate'); if(card&&card.dataset.id) openProfile(card.dataset.id); }); });

@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="assets/site.css?v=22" />
+  <link rel="stylesheet" href="assets/site.css?v=23" />
   <style>
 :root {
   --bg: #07111f;
@@ -288,6 +288,26 @@ input:focus, select:focus, textarea:focus { border-color: rgba(66,217,255,.55); 
 .reg-embed { margin-top: 14px; }
 .reg-embed iframe { width: 100%; min-height: 720px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
 @media (max-width: 640px) { .reg-form { grid-template-columns: 1fr; } }
+
+/* ===================== NAV ACTIVE · STATS · BACK-TO-TOP · A11Y ===================== */
+nav:not(.mobile-tabbar) a.active { background: rgba(66,217,255,.14); color: var(--cyan); }
+a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.stats-strip { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 4px; }
+.stat { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 92px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+.stat b { font-size: 1.25rem; font-weight: 950; line-height: 1; color: var(--text); }
+.stat span { font-size: .74rem; font-weight: 800; color: var(--muted); }
+.stat.st-high b { color: var(--green); }
+.stat.st-med b { color: var(--blue); }
+.stat.st-asp b { color: var(--gold); }
+.stat.st-warn b { color: var(--red); }
+.votes-pill { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; font-size: .74rem; font-weight: 850; color: var(--cyan); background: rgba(66,217,255,.10); border: 1px solid rgba(66,217,255,.3); }
+.reg-intro { color: #d7e5f5; max-width: 760px; margin: 0 0 14px; }
+.reg-cta { display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; padding: 14px 22px; }
+.reg-soon { color: var(--muted); font-size: .9rem; margin: 10px 0 0; }
+.back-to-top { position: fixed; right: 18px; bottom: 22px; z-index: 250; width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--line); background: rgba(9,18,33,.92); color: var(--cyan); font-size: 1.2rem; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,.4); opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity .18s ease, transform .18s ease; }
+.back-to-top.show { opacity: 1; transform: none; pointer-events: auto; }
+.back-to-top:hover { background: rgba(66,217,255,.14); }
+@media (max-width: 768px) { .back-to-top { bottom: calc(86px + env(safe-area-inset-bottom)); right: 14px; } }
 @media (max-width: 1100px) {
   .login-grid, .speaker-form, .controls { grid-template-columns: 1fr; }
   .speaker-form textarea { grid-column: span 1; }
@@ -502,8 +522,8 @@ html, body { max-width: 100%; }
 }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="assets/config.js?v=22"></script>
-  <script defer src="assets/app.js?v=22"></script>
+  <script defer src="assets/config.js?v=23"></script>
+  <script defer src="assets/app.js?v=23"></script>
 </head>
 <body>
   <div class="wrap">
@@ -530,6 +550,8 @@ html, body { max-width: 100%; }
       <a href="#admin" id="adminNav" class="hidden">Admin Export</a>
     </nav>
 
+    <div id="statsStrip" class="stats-strip hidden" aria-label="Review status summary"></div>
+
     <section id="about" class="card">
       <div class="section-title compact"><div><h2>About IndabaX Egypt 2026</h2><p class="subtitle">What this is, and who it's for.</p></div></div>
       <div class="about-body">
@@ -546,26 +568,9 @@ html, body { max-width: 100%; }
     </section>
 
     <section id="registration" class="card">
-      <div class="section-title compact"><div><h2>Registration</h2><p class="subtitle">Register your interest in attending IndabaX Egypt 2026.</p></div></div>
-      <div id="registrationBody">
-        <div class="hint-box" id="regNote">Registration isn't open yet — this is a preview of the form. It will be connected to the official Google Form soon. <strong>Nothing typed here is submitted or stored.</strong></div>
-        <form class="reg-form" id="regForm" onsubmit="return false;" aria-describedby="regNote">
-          <label class="fld"><span>Full name</span><input id="regName" type="text" autocomplete="name" placeholder="Your name"></label>
-          <label class="fld"><span>Email</span><input id="regEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
-          <label class="fld"><span>Affiliation / organization</span><input id="regOrg" type="text" autocomplete="organization" placeholder="University / company"></label>
-          <label class="fld"><span>Role</span><select id="regRole"><option value="">Select…</option><option>Student</option><option>Researcher</option><option>Engineer / Practitioner</option><option>Founder / Startup</option><option>Other</option></select></label>
-          <label class="fld"><span>Ticket type</span><select id="regTicket"><option value="">Select…</option><option>Student</option><option>Academic</option><option>Professional</option><option>Sponsor / Partner</option></select></label>
-          <fieldset class="fld reg-tracks reg-wide"><legend>Track interest</legend>
-            <label><input type="checkbox" name="track" value="Healthcare AI"> Healthcare AI</label>
-            <label><input type="checkbox" name="track" value="Finance AI"> Finance AI</label>
-            <label><input type="checkbox" name="track" value="NLP"> NLP</label>
-            <label><input type="checkbox" name="track" value="CV"> Computer Vision</label>
-            <label><input type="checkbox" name="track" value="MLOps"> MLOps</label>
-          </fieldset>
-          <label class="fld reg-wide"><span>Dietary / accessibility notes</span><textarea id="regNotes" rows="2" placeholder="Anything we should know to host you well"></textarea></label>
-          <div class="reg-actions reg-wide"><button type="submit" class="btn primary" disabled title="Opens once the Google Form is connected">Register (opens soon)</button></div>
-        </form>
-      </div>
+      <div class="section-title compact"><div><h2>Registration</h2><p class="subtitle">Registration is handled via an external Google Form.</p></div></div>
+      <p class="reg-intro">Register your interest in attending IndabaX Egypt 2026. The form (hosted on Google Forms) collects your name, email, affiliation, role, location and track interest — and opens in a new tab. Nothing is collected on this site.</p>
+      <div id="registrationBody"></div>
     </section>
 
     <section id="access" class="card access-card">
@@ -594,7 +599,7 @@ html, body { max-width: 100%; }
 
     <section id="speakers">
       <div class="section-title"><div><h2>Speaker directory</h2><p class="subtitle">Proposed candidates and team-added suggestions.</p></div></div>
-      <div class="controls"><input id="searchSpeakers" placeholder="Search speaker, company, focus…" /><select id="filterPriority"><option value="">All priorities</option><option>High</option><option>Medium</option><option>Aspirational</option><option>Team proposed</option></select></div>
+      <div class="controls"><input id="searchSpeakers" aria-label="Search speakers" placeholder="Search speaker, company, focus…" /><select id="filterPriority" aria-label="Filter by priority"><option value="">All priorities</option><option>High</option><option>Medium</option><option>Aspirational</option><option>Team proposed</option></select><select id="filterTag" aria-label="Filter by topic"><option value="">All topics</option></select></div>
       <div id="speakerDirectory" class="speaker-grid"></div>
     </section>
 
@@ -641,6 +646,8 @@ html, body { max-width: 100%; }
       <div class="modal-foot"><button type="button" class="btn modal-cancel">Cancel</button><button type="button" class="btn primary modal-save">Save</button></div>
     </div>
   </div>
+
+  <button id="backToTop" class="back-to-top" type="button" aria-label="Back to top" title="Back to top">↑</button>
 
   <nav class="mobile-tabbar" aria-label="Sections">
     <a href="#home" data-section="home" class="active" aria-label="Workspace home">
