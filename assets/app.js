@@ -1,3 +1,9 @@
+// ===== Registration (Google Form) — paste your form links here =====
+// GOOGLE_FORM_EMBED_URL: the form's EMBED link (…/viewform?embedded=true) → shows inline in an iframe.
+// GOOGLE_FORM_URL:       the public form link (…/viewform)               → "Open registration form" button.
+// Leave both '' to keep the preview scaffold. NOTHING is submitted/collected until these are set.
+const GOOGLE_FORM_EMBED_URL = ''; // TODO: paste Google Form EMBED url here
+const GOOGLE_FORM_URL = '';       // TODO: paste Google Form public url here
 let db=null;
 let slots=[]; let speakers=[]; let candidates=[]; let myVotes=new Set(); let fundraisingTargets=[];
 let access={name:localStorage.getItem('reviewerName')||'', code:localStorage.getItem('inviteCode')||'', verified:false, can_vote:false, can_add:false, can_export:false, can_view_fundraising:false, role:null, is_public:false};
@@ -231,6 +237,16 @@ function deleteSlot(id){ rpcDelete('delete_program_slot',{p_invite_code:access.c
 function deleteSpeaker(id){ const s=(speakers||[]).find(x=>x.id===id); rpcDelete('delete_speaker',{p_invite_code:access.code,p_speaker_id:id},'Permanently delete '+((s&&s.name)||'this speaker')+'? This also removes their votes.\n\nTip: Edit → Status → Archived just hides them and keeps votes.',loadData); }
 function deleteFunder(id){ const f=(fundraisingTargets||[]).find(x=>String(x.id)===String(id)); rpcDelete('delete_fundraising_target',{p_invite_code:access.code,p_id:id},'Delete '+((f&&f.name)||'this fundraising target')+'?',loadFundraising); }
 
+function renderRegistration(){
+  const el=$('registrationBody'); if(!el)return;
+  if(GOOGLE_FORM_EMBED_URL){
+    el.innerHTML='<div class="reg-actions"><a class="btn primary" href="'+esc(GOOGLE_FORM_URL||GOOGLE_FORM_EMBED_URL)+'" target="_blank" rel="noopener">Open registration form ↗</a></div><div class="reg-embed"><iframe title="IndabaX Egypt 2026 registration form" src="'+esc(GOOGLE_FORM_EMBED_URL)+'" loading="lazy">Loading…</iframe></div>';
+  } else if(GOOGLE_FORM_URL){
+    const note=$('regNote'); if(note) note.innerHTML='Registration is open — use the button below to open the official form.';
+    el.insertAdjacentHTML('afterbegin','<div class="reg-actions" style="margin-bottom:14px"><a class="btn primary" href="'+esc(GOOGLE_FORM_URL)+'" target="_blank" rel="noopener">Open registration form ↗</a></div>');
+  }
+  /* else: leave the preview scaffold (TODO: set GOOGLE_FORM_EMBED_URL / GOOGLE_FORM_URL above) */
+}
 window.addEventListener('DOMContentLoaded',async()=>{
   const params=new URLSearchParams(location.search);
   const paramName=params.get('name');
@@ -253,6 +269,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
   $('adminSummaryBtn').addEventListener('click',loadAdminSummary);
   $('exportCsvBtn').addEventListener('click',()=>adminExport('csv'));
   $('exportJsonBtn').addEventListener('click',()=>adminExport('json'));
+  renderRegistration();
   db=initClient();
   if(db){
     status('Ready. Enter the access code shared with you to open the workspace.', 'ok');

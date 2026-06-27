@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="assets/site.css?v=21" />
+  <link rel="stylesheet" href="assets/site.css?v=22" />
   <style>
 :root {
   --bg: #07111f;
@@ -265,6 +265,29 @@ input:focus, select:focus, textarea:focus { border-color: rgba(66,217,255,.55); 
 .pf-notes { white-space: pre-wrap; background: rgba(255,209,102,.08); border: 1px solid rgba(255,209,102,.28); border-radius: 10px; padding: 8px 11px; }
 .pf-admin { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); display: grid; gap: 10px; }
 @media (max-width: 480px) { .pf-row { grid-template-columns: 1fr; gap: 2px; } .pf-k { font-size: .78rem; } }
+
+/* ===================== ABOUT · EVENT META · REGISTRATION ===================== */
+.event-meta { margin-top: 18px; display: grid; gap: 8px; justify-items: center; }
+.evt-badge { display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 999px; font-size: .74rem; font-weight: 850; color: var(--gold); background: rgba(255,209,102,.12); border: 1px solid rgba(255,209,102,.4); }
+.evt-line { margin: 0; color: #d7e5f5; font-size: .98rem; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; }
+.evt-dot { color: var(--muted); }
+.evt-addr { margin: 0; color: var(--muted); font-size: .88rem; }
+.evt-map { font-weight: 800; }
+.about-body { display: grid; gap: 12px; max-width: 820px; }
+.about-body p { margin: 0; color: #d7e5f5; }
+.about-note { color: var(--text); background: rgba(255,209,102,.08); border: 1px solid rgba(255,209,102,.25); border-radius: 12px; padding: 10px 14px; }
+.about-body .event-meta { justify-items: start; margin-top: 6px; }
+.about-body .evt-line { justify-content: flex-start; }
+.reg-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.reg-wide { grid-column: 1 / -1; }
+.reg-tracks { border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.reg-tracks legend { padding: 0 6px; color: var(--muted); font-weight: 800; font-size: .8rem; }
+.reg-tracks label { display: inline-flex; align-items: center; gap: 8px; margin: 4px 14px 4px 0; font-weight: 700; }
+.reg-tracks input { width: auto; }
+.reg-actions { display: flex; gap: 10px; }
+.reg-embed { margin-top: 14px; }
+.reg-embed iframe { width: 100%; min-height: 720px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+@media (max-width: 640px) { .reg-form { grid-template-columns: 1fr; } }
 @media (max-width: 1100px) {
   .login-grid, .speaker-form, .controls { grid-template-columns: 1fr; }
   .speaker-form textarea { grid-column: span 1; }
@@ -479,8 +502,8 @@ html, body { max-width: 100%; }
 }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="assets/config.js?v=21"></script>
-  <script defer src="assets/app.js?v=21"></script>
+  <script defer src="assets/config.js?v=22"></script>
+  <script defer src="assets/app.js?v=22"></script>
 </head>
 <body>
   <div class="wrap">
@@ -488,17 +511,62 @@ html, body { max-width: 100%; }
       <div class="eyebrow">IndabaX Egypt 2026 · Program Review</div>
       <h1>Program scenarios and speaker review</h1>
       <p class="lead">This workspace supports internal program planning for IndabaX Egypt 2026. All speakers listed are proposed candidates pending formal invitation and confirmation.</p>
+      <div class="event-meta">
+        <span class="evt-badge">Tentative — pending confirmation</span>
+        <p class="evt-line"><span>📅 <strong>10–12 August 2026</strong></span> <span class="evt-dot" aria-hidden="true">·</span> <span>📍 <strong>AAST El Alamein</strong> (Arab Academy — El Alamein campus)</span></p>
+        <a class="evt-map" href="https://www.google.com/maps/search/?api=1&amp;query=Arab+Academy+for+Science+Technology+and+Maritime+Transport+El+Alamein" target="_blank" rel="noopener">View on Google Maps ↗</a>
+      </div>
       <div class="status-strip" id="connectionStatus">Opening program workspace…</div>
     </header>
 
     <nav>
       <a href="#access" id="accessNav">Open workspace</a>
+      <a href="#about">About</a>
+      <a href="#registration">Registration</a>
       <a href="#scenario-a">Scenario A</a>
       <a href="#scenario-b">Scenario B</a>
       <a href="#speakers">Speakers</a>
       <a href="#fundraising" id="fundraisingNav" class="hidden">Fundraising</a>
       <a href="#admin" id="adminNav" class="hidden">Admin Export</a>
     </nav>
+
+    <section id="about" class="card">
+      <div class="section-title compact"><div><h2>About IndabaX Egypt 2026</h2><p class="subtitle">What this is, and who it's for.</p></div></div>
+      <div class="about-body">
+        <p><strong>IndabaX Egypt 2026</strong> is a community-run national gathering for Egypt's Artificial Intelligence and Machine-Learning community. It is part of the <strong>Deep Learning Indaba</strong> — a pan-African movement to strengthen AI/ML across the continent through its annual flagship Indaba and independently-organised national <strong>IndabaX</strong> events.</p>
+        <p>The day brings together <strong>researchers, students, ML/AI engineers and practitioners, and startups &amp; founders</strong> for keynotes, hands-on workshops, tutorials, research talks, live demos, posters and panels — across tracks spanning GenAI, Arabic NLP, AI for Healthcare, AI for Finance, Responsible AI, and the research-to-startups pipeline.</p>
+        <p class="about-note"><strong>Please note:</strong> all speakers listed on this site are <strong>proposed candidates pending formal invitation and confirmation</strong>.</p>
+        <div class="event-meta">
+          <span class="evt-badge">Tentative — pending confirmation</span>
+          <p class="evt-line"><span>📅 <strong>10–12 August 2026</strong></span> <span class="evt-dot" aria-hidden="true">·</span> <span>📍 <strong>AAST El Alamein</strong> — Arab Academy for Science, Technology &amp; Maritime Transport (El Alamein campus)</span></p>
+          <p class="evt-addr">Al Alameen City, El Alamein, Marsa Matrouh Governorate</p>
+          <a class="evt-map" href="https://www.google.com/maps/search/?api=1&amp;query=Arab+Academy+for+Science+Technology+and+Maritime+Transport+El+Alamein" target="_blank" rel="noopener">View on Google Maps ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="registration" class="card">
+      <div class="section-title compact"><div><h2>Registration</h2><p class="subtitle">Register your interest in attending IndabaX Egypt 2026.</p></div></div>
+      <div id="registrationBody">
+        <div class="hint-box" id="regNote">Registration isn't open yet — this is a preview of the form. It will be connected to the official Google Form soon. <strong>Nothing typed here is submitted or stored.</strong></div>
+        <form class="reg-form" id="regForm" onsubmit="return false;" aria-describedby="regNote">
+          <label class="fld"><span>Full name</span><input id="regName" type="text" autocomplete="name" placeholder="Your name"></label>
+          <label class="fld"><span>Email</span><input id="regEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
+          <label class="fld"><span>Affiliation / organization</span><input id="regOrg" type="text" autocomplete="organization" placeholder="University / company"></label>
+          <label class="fld"><span>Role</span><select id="regRole"><option value="">Select…</option><option>Student</option><option>Researcher</option><option>Engineer / Practitioner</option><option>Founder / Startup</option><option>Other</option></select></label>
+          <label class="fld"><span>Ticket type</span><select id="regTicket"><option value="">Select…</option><option>Student</option><option>Academic</option><option>Professional</option><option>Sponsor / Partner</option></select></label>
+          <fieldset class="fld reg-tracks reg-wide"><legend>Track interest</legend>
+            <label><input type="checkbox" name="track" value="Healthcare AI"> Healthcare AI</label>
+            <label><input type="checkbox" name="track" value="Finance AI"> Finance AI</label>
+            <label><input type="checkbox" name="track" value="NLP"> NLP</label>
+            <label><input type="checkbox" name="track" value="CV"> Computer Vision</label>
+            <label><input type="checkbox" name="track" value="MLOps"> MLOps</label>
+          </fieldset>
+          <label class="fld reg-wide"><span>Dietary / accessibility notes</span><textarea id="regNotes" rows="2" placeholder="Anything we should know to host you well"></textarea></label>
+          <div class="reg-actions reg-wide"><button type="submit" class="btn primary" disabled title="Opens once the Google Form is connected">Register (opens soon)</button></div>
+        </form>
+      </div>
+    </section>
 
     <section id="access" class="card access-card">
       <div>
@@ -578,6 +646,14 @@ html, body { max-width: 100%; }
     <a href="#home" data-section="home" class="active" aria-label="Workspace home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
       <span>Workspace</span>
+    </a>
+    <a href="#about" data-section="about" aria-label="About">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      <span>About</span>
+    </a>
+    <a href="#registration" data-section="registration" aria-label="Registration">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      <span>Register</span>
     </a>
     <a href="#scenario-a" data-section="scenario-a" aria-label="Scenario A">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
