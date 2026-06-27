@@ -217,7 +217,7 @@ input:focus, select:focus, textarea:focus { border-color: rgba(66,217,255,.55); 
 .edit-photo .spk-avatar { width: 76px; height: 76px; }
 .row-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
 .btn.mini { padding: 8px 12px; font-size: .82rem; border-radius: 10px; font-weight: 800; width: auto; }
-.card-admin { margin-top: 4px; display: flex; gap: 8px; justify-content: center; }
+.card-admin { margin-top: 4px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .slot-admin { margin-top: 12px; }
 .fund-admin { display: flex; gap: 8px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
 .fund-admin select { width: auto; min-width: 150px; padding: 9px 12px; }
@@ -430,6 +430,8 @@ html, body { max-width: 100%; }
   .spk-head .rank { position: absolute; top: 0; right: 0; width: 24px; height: 24px; font-size: .76rem; }
   .speaker-card .spk-link { width: 34px; height: 34px; }
   .speaker-card .spk-link svg { width: 16px; height: 16px; }
+  /* admin controls: status dropdown full-width on its own row, Edit/Delete wrap below — no overflow on narrow 2-col cards */
+  .speaker-card .ip-select { width: 100%; min-width: 0; flex-basis: 100%; }
 }
 
 @media (max-width: 380px) {
